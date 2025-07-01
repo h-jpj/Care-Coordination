@@ -1,0 +1,57 @@
+# version: '3.8'  # Removed as it's obsolete
+
+services:
+  database:
+    image: mariadb:10.11
+    container_name: care_coordination_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: care_coordination
+      MYSQL_USER: care_user
+      MYSQL_PASSWORD: care_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - care_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - care-network
+
+  backend:
+    build: ./backend
+    container_name: care_coordination_api
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - DB_HOST=database
+      - DB_PORT=3306
+      - DB_NAME=care_coordination
+      - DB_USER=care_user
+      - DB_PASSWORD=care_password
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - care-network
+
+  frontend:
+    build: ./frontend
+    container_name: care_coordination_web
+    ports:
+      - "3004:3004"
+    depends_on:
+      - backend
+    networks:
+      - care-network
+
+volumes:
+  care_db_data:
+
+networks:
+  care-network:
+    driver: bridge
