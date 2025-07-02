@@ -1,214 +1,182 @@
-# Care Company Coordination App
+# 🏥 Care Coordination System
 
-A real-time care coordination system with mobile app for ground workers and web dashboard for office workers.
+> **Stop paying £20+ per employee per month for care management software!**
+>
+> This open-source system does everything the expensive ones do - for FREE.
 
-## Features
+**📋 Windows users: See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed setup instructions**
 
-- **Real-time job coordination** with color-coded status updates
-- **GPS-based check-in/check-out** for care workers
-- **Role-based access control** (office workers vs ground workers)
-- **Live location tracking** and mapping
-- **Care notes and communication** system
-- **Offline functionality** for mobile app
-- **Real-time notifications** via WebSocket
+## 💰 Why Build This?
 
-## Technology Stack
+Current care management software costs **£20+ per employee per month**. For a company with 50 employees, that's **£12,000+ per year**!
 
-- **Backend**: Node.js + Express + TypeScript + Socket.io
-- **Database**: MariaDB
-- **Frontend**: React + TypeScript + Material-UI
-- **Mobile**: React Native + TypeScript
-- **Infrastructure**: Docker + Docker Compose
-- **Authentication**: JWT with role-based access
+This system provides the same features for the cost of hosting (~£20/month total).
 
-## 🚀 Quick Start
+**Annual savings: £11,760+ for 50 employees**
 
-### Option 1: One-Command Setup (Recommended)
+## ✨ What It Does
+
+### For Care Managers
+- **Worker Management**: Add staff, track hours, manage schedules
+- **Client Management**: Complete client profiles with medical info
+- **Medication Tracking**: Daily medication schedules and reminders
+- **Task Management**: Assign care tasks (bathing, cooking, cleaning)
+- **Real-time Updates**: See what's happening across all sites
+
+### For Care Workers
+- **Simple Interface**: Easy to use on any device
+- **Client Information**: Quick access to care plans and medical info
+- **Task Lists**: Clear daily tasks for each client
+- **Medication Reminders**: Never miss medication times
+- **Quick Updates**: Log completed tasks instantly
+
+## 🚀 Getting Started
+
+### For Windows Users (Easy Setup)
+
+1. **Install Docker Desktop**
+   - Download from: https://www.docker.com/products/docker-desktop
+   - Install and restart your computer
+   - Make sure Docker is running (whale icon in system tray)
+
+2. **Download This Project**
+   - Download as ZIP from GitHub or clone with Git
+   - Extract to a folder like `C:\care-coordination`
+
+3. **Run the Setup**
+   - Double-click `setup-windows.bat`
+   - Wait for everything to download and start (5-10 minutes first time)
+   - Open your browser to: http://localhost:3004
+
+### For Mac/Linux Users
+
 ```bash
 git clone <repository-url>
 cd care-app
-chmod +x start.sh
-./start.sh
+./deploy.sh
 ```
 
-### Option 2: Manual Setup
-```bash
-# 1. Clone and setup
-git clone <repository-url>
-cd care-app
-cp .env.example .env
+### 🌐 Access Your System
+- **Web App**: http://localhost:3004
+- **API**: http://localhost:3003
+- **Database**: localhost:3307
+- **Login**: admin@carecompany.com / password123
 
-# 2. Start all services
+### 🗄️ Database Access
+```bash
+# Connect to database
+sudo docker exec -it care_coordination_db mariadb -u care_user -pcare_password care_coordination
+
+# View tables
+SHOW TABLES;
+
+# Check sample data
+SELECT * FROM users;
+SELECT * FROM clients;
+```
+
+## 📋 How to Use
+
+### Adding Workers
+1. Go to "Workers" section
+2. Click "Add Worker"
+3. Fill in details (name, role, contact info, hours)
+4. Worker can now log in and see their tasks
+
+### Adding Clients
+1. Go to "Clients" section  
+2. Click "Add Client"
+3. Add personal info, medical conditions, care needs
+4. Assign workers to this client
+
+### Managing Medications
+1. Open a client's profile
+2. Click "Medications"
+3. Add medications with dosage, timing, special instructions
+4. Workers will see medication reminders
+
+### Assigning Tasks
+1. Open a client's profile
+2. Click "Tasks"
+3. Add care tasks (bathing, cooking, cleaning, etc.)
+4. Set frequency and priority
+5. Workers see these on their task list
+
+## 🔧 For Developers
+
+### Built With
+- **Web Interface**: React (modern, fast)
+- **Server**: Node.js (reliable, scalable)
+- **Database**: MariaDB (secure, professional-grade)
+- **Deployment**: Docker (works anywhere)
+
+### Project Structure
+```
+care-app/
+├── backend/              # Node.js API server
+├── frontend/             # React web interface
+├── database/             # Database initialization
+│   └── init/            # Schema and sample data
+├── docker-compose.yml    # Container setup
+├── deploy.sh            # Mac/Linux deployment
+├── start.sh             # Server startup script
+├── SETUP.md             # Complete setup guide
+└── README.md            # This file
+```
+
+### Local Development
+```bash
+# Start all services with Docker
 docker-compose up -d
 
-# 3. Wait for services to be ready (check logs)
+# View logs
 docker-compose logs -f
+
+# Individual service development
+cd backend && npm install && npm run dev
+cd frontend && npm install && npm start
+
+# Database access
+sudo docker exec -it care_coordination_db mariadb -u care_user -pcare_password care_coordination
+
+# Stop services
+docker-compose down
 ```
 
-### 🌐 Access Points
-- **Web Dashboard**: http://localhost:3000 (or http://192.168.0.103:3000)
-- **API**: http://localhost:3002 (or http://192.168.0.103:3002)
-- **Database**: localhost:3306 (or 192.168.0.103:3306)
+### Contributing
+1. Fork this repository
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Make your changes and test them
+4. Commit: `git commit -m 'Add new feature'`
+5. Push: `git push origin feature/new-feature`
+6. Open a Pull Request
 
-### 📱 Mobile App Setup
-```bash
-# Install dependencies and start Metro
-chmod +x launch-mobile.sh
-./launch-mobile.sh
+## 🆘 Need Help?
 
-# In another terminal, run on device:
-cd mobile
-npx react-native run-android  # For Android
-npx react-native run-ios      # For iOS (macOS only)
-```
+### Common Issues
+- **Docker not starting**: Make sure Docker Desktop is running
+- **Can't access website**: Check if port 3004 is available
+- **Worker/Client creation fails**: Check backend logs with `docker-compose logs backend`
+- **Database errors**: Use `sudo docker exec -it care_coordination_db mariadb -u care_user -pcare_password care_coordination`
+- **Missing database columns**: See SETUP.md troubleshooting section
 
-## Default Login Credentials
+### Getting Support
+- **Bug Reports**: Create a GitHub Issue
+- **Questions**: Start a GitHub Discussion
+- **Feature Requests**: Create a GitHub Issue with "enhancement" label
 
-### Office Workers
-- **Admin**: admin@carecompany.com / password123
-- **Manager**: manager@carecompany.com / password123
+## 📄 License
 
-### Ground Workers
-- **Worker 1**: worker1@carecompany.com / password123
-- **Worker 2**: worker2@carecompany.com / password123
-- **Worker 3**: worker3@carecompany.com / password123
+MIT License - You can use this commercially, modify it, and distribute it freely.
 
-## Development
+## 🎯 What's Next?
 
-### Backend Development
-```bash
-cd backend
-npm install
-npm run dev
-```
+- [ ] Mobile app for workers
+- [ ] Advanced reporting
+- [ ] Email/SMS notifications  
+- [ ] Integration with payroll systems
+- [ ] Multi-location support
 
-### Frontend Development
-```bash
-cd frontend
-npm install
-npm start
-```
+---
 
-### Mobile Development
-```bash
-cd mobile
-npm install
-npx react-native run-android
-# or
-npx react-native run-ios
-```
-
-## Database Schema
-
-The system includes the following main entities:
-- **Users** (office_worker, ground_worker)
-- **Clients** (service users with addresses)
-- **Jobs** (care visits with scheduling)
-- **Location Logs** (GPS check-in/out tracking)
-- **Notes** (care notes and internal communications)
-- **Job Status History** (audit trail)
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/me` - Get current user
-
-### Jobs
-- `GET /api/jobs` - List jobs (filtered by role)
-- `POST /api/jobs` - Create new job (office workers only)
-- `PUT /api/jobs/:id` - Update job
-- `PUT /api/jobs/:id/status` - Update job status
-
-### Location
-- `POST /api/location/checkin` - Check in to job
-- `POST /api/location/checkout` - Check out from job
-- `GET /api/location/worker/:id` - Get worker location
-
-### Notes
-- `GET /api/notes/job/:id` - Get notes for job
-- `POST /api/notes` - Add new note
-
-## Real-time Events
-
-The system uses WebSocket for real-time updates:
-- `job_status_updated` - Job status changes
-- `worker_location_updated` - Worker location updates
-- `new_note_added` - New care notes
-- `job_assigned` - Job assignments
-
-## Mobile App Features
-
-- **Job List**: View assigned jobs with status
-- **GPS Check-in**: Location-verified check-in/out
-- **Care Notes**: Add notes with voice-to-text
-- **Offline Mode**: Basic functionality without internet
-- **Push Notifications**: Job updates and assignments
-
-## Web Dashboard Features
-
-- **Live Status Board**: Real-time job status with color coding
-- **Job Management**: Create, edit, assign jobs
-- **Worker Map**: Live worker locations
-- **Notes Management**: View and add care notes
-- **User Management**: Manage workers and permissions
-
-## Status Color Coding
-
-- 🟢 **Green**: Completed jobs
-- 🟡 **Yellow/Orange**: Late jobs
-- 🔴 **Red**: Cancelled jobs
-- 🔵 **Blue**: In progress jobs
-- ⚪ **Gray**: Pending/assigned jobs
-
-## 🚀 Server Deployment
-
-### Deploy to jay@192.168.0.103
-```bash
-# Deploy backend and start services
-chmod +x deploy.sh
-./deploy.sh
-
-# SSH to server and start
-ssh jay@192.168.0.103
-cd care-app
-./start.sh
-```
-
-### Launch Web App
-```bash
-# After deployment, access:
-# Web Dashboard: http://192.168.0.103:3000
-# API: http://192.168.0.103:3002
-```
-
-### Launch Mobile App
-```bash
-# On your development machine:
-chmod +x launch-mobile.sh
-./launch-mobile.sh
-
-# In another terminal:
-cd mobile
-npx react-native run-android
-```
-
-## 📚 Documentation
-
-- **SETUP.md** - Detailed setup instructions
-- **TESTING.md** - Testing procedures and guidelines
-- **DEPLOYMENT.md** - Production deployment guide
-- **PROJECT_SUMMARY.md** - Complete project overview
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is proprietary software for the care company.
+**Stop paying ridiculous monthly fees. Take control of your care coordination today!** ⭐

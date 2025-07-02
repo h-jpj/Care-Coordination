@@ -9,9 +9,21 @@ SERVER_PATH="/home/jay/care-app"
 echo "🚀 Starting deployment to $SERVER..."
 echo "📦 You'll be prompted for the password (aes) for each step..."
 
-# Transfer all files
+# Transfer all files (excluding problematic directories)
 echo "📦 Transferring all files..."
-scp -o StrictHostKeyChecking=no -r . "$SERVER:$SERVER_PATH/"
+rsync -avz --progress \
+  --exclude 'node_modules' \
+  --exclude '.git' \
+  --exclude 'dist' \
+  --exclude 'build' \
+  --exclude '.cache' \
+  --exclude '.env' \
+  --exclude '*.log' \
+  --exclude '.DS_Store' \
+  --exclude '.vscode' \
+  --exclude '.idea' \
+  -e "ssh -o StrictHostKeyChecking=no" \
+  . "$SERVER:$SERVER_PATH/"
 
 # Make start script executable and run it on server
 echo "🚀 Starting application on server..."

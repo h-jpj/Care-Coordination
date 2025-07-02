@@ -404,8 +404,9 @@ app.get('/users', authenticateToken, requireManagement, async (req, res) => {
     const [users] = await pool.execute(`
       SELECT
         id, employee_id, email, first_name, last_name, role, employment_type,
-        start_date, contract_hours_per_week, hourly_rate, phone, is_active,
-        address_line1, address_line2, city, postal_code, created_at, last_login
+        start_date, contract_hours_per_week, hourly_rate, phone, mobile, is_active,
+        address_line1, address_line2, city, postal_code, transport_type, has_own_transport,
+        availability, created_at, last_login
       FROM users
       WHERE is_active = TRUE
       ORDER BY first_name, last_name
@@ -421,7 +422,8 @@ app.get('/users', authenticateToken, requireManagement, async (req, res) => {
       phone: user.phone || '',
       mobile: user.mobile || '',
       employee_id: user.employee_id || '',
-      transport_type: user.transport_type || '',
+      transport_type: user.transport_type || 'walking',
+      has_own_transport: user.has_own_transport || false,
       availability: user.availability || ''
     }));
 
@@ -637,6 +639,7 @@ app.post('/users', authenticateToken, requireManagement, async (req, res) => {
       last_name,
       email,
       phone,
+      mobile,
       employee_id,
       worker_type, // 'ground_worker' or 'office_worker'
       role,
@@ -644,6 +647,9 @@ app.post('/users', authenticateToken, requireManagement, async (req, res) => {
       start_date,
       hourly_rate,
       contract_hours_per_week,
+      transport_type,
+      has_own_transport,
+      availability,
       address_line1,
       address_line2,
       city,
@@ -739,19 +745,37 @@ app.post('/users', authenticateToken, requireManagement, async (req, res) => {
     // Insert new worker
     const [result] = await pool.execute(`
       INSERT INTO users (
-        employee_id, email, password_hash, first_name, last_name, phone,
+        employee_id, email, password_hash, first_name, last_name, phone, mobile,
         role, employment_type, start_date, contract_hours_per_week, hourly_rate,
         address_line1, address_line2, city, postal_code,
+        emergency_contact_name, emergency_contact_phone,
+        has_own_transport,
         is_active, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `, [
-      finalEmployeeId, email, password_hash, first_name, last_name, phone,
+      finalEmployeeId, email, password_hash, first_name, last_name, phone, mobile || null,
       mappedRole, employment_type, start_date || null, contract_hours_per_week || null, hourly_rate || null,
       address_line1 || null, address_line2 || null, city || null, postal_code || null,
+      emergency_contact_name || null, emergency_contact_phone || null,
+      has_own_transport || false,
       true // is_active
     ]);
 
     const newUserId = result.insertId;
+
+    // Insert availability data if provided
+    if (availability && typeof availability === 'object') {
+      const availabilityPromises = Object.entries(availability).map(async ([day, dayData]) => {
+        if (dayData.available) {
+          await pool.execute(`
+            INSERT INTO worker_availability (user_id, day_of_week, start_time, end_time, is_available)
+            VALUES (?, ?, ?, ?, ?)
+          `, [newUserId, day, dayData.start_time, dayData.end_time, true]);
+        }
+      });
+
+      await Promise.all(availabilityPromises);
+    }
 
     // Log the creation
     console.log(`New worker created: ID ${newUserId}, Email: ${email}, Role: ${role}, Type: ${worker_type}`);
@@ -771,13 +795,16 @@ app.post('/users', authenticateToken, requireManagement, async (req, res) => {
         contract_hours_per_week: contract_hours_per_week || null,
         hourly_rate: hourly_rate || null,
         phone: phone || '',
-        mobile: '',
+        mobile: mobile || '',
         address_line1: address_line1 || '',
         address_line2: address_line2 || '',
         city: city || '',
         postal_code: postal_code || '',
-        transport_type: '',
-        availability: '',
+        emergency_contact_name: emergency_contact_name || '',
+        emergency_contact_phone: emergency_contact_phone || '',
+        transport_type: transport_type || '',
+        has_own_transport: has_own_transport || false,
+        availability: availability || {},
         is_active: true,
         last_login: null,
         created_at: new Date().toISOString()
@@ -1688,8 +1715,26 @@ app.get('/workers/:id/qualifications', authenticateToken, async (req, res) => {
 
 app.get('/workers/:id/availability', authenticateToken, async (req, res) => {
   try {
-    // Return empty array for now - can be implemented later
-    res.json({ success: true, data: [] });
+    const { id } = req.params;
+
+    // Get availability from worker_availability table
+    const [availability] = await pool.execute(`
+      SELECT day_of_week, start_time, end_time, is_available
+      FROM worker_availability
+      WHERE user_id = ? AND is_available = TRUE
+      ORDER BY
+        CASE day_of_week
+          WHEN 'monday' THEN 1
+          WHEN 'tuesday' THEN 2
+          WHEN 'wednesday' THEN 3
+          WHEN 'thursday' THEN 4
+          WHEN 'friday' THEN 5
+          WHEN 'saturday' THEN 6
+          WHEN 'sunday' THEN 7
+        END
+    `, [id]);
+
+    res.json({ success: true, data: availability });
   } catch (error) {
     console.error('Error fetching availability:', error);
     res.status(500).json({ success: false, error: 'Internal server error: ' + error.message });

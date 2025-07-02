@@ -1,14 +1,40 @@
 import React, { useState } from 'react';
 import {
-  Close as X,
-  Person as User,
-  Email as Mail,
-  Phone,
-  LocationOn as MapPin,
-  Work as Briefcase,
-  Key,
-  Visibility as Eye,
-  VisibilityOff as EyeOff
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  RadioGroup,
+  Radio,
+  InputAdornment,
+  Alert,
+  Divider,
+  Card,
+  CardContent,
+  IconButton
+} from '@mui/material';
+import {
+  Person as PersonIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  PhoneAndroid as MobileIcon,
+  LocationOn as LocationIcon,
+  Work as WorkIcon,
+  Schedule as ScheduleIcon,
+  DirectionsCar as CarIcon,
+  ContactEmergency as EmergencyIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { api } from '../services/api';
 
@@ -18,6 +44,7 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
     last_name: '',
     email: '',
     phone: '',
+    mobile: '',
     employee_id: '',
     worker_type: 'ground_worker',
     role: 'carer',
@@ -25,12 +52,21 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
     start_date: '',
     hourly_rate: '',
     contract_hours_per_week: '',
+    transport_type: 'walking',
+    has_own_transport: false,
+    availability: {
+      monday: { available: false, start_time: '09:00', end_time: '17:00' },
+      tuesday: { available: false, start_time: '09:00', end_time: '17:00' },
+      wednesday: { available: false, start_time: '09:00', end_time: '17:00' },
+      thursday: { available: false, start_time: '09:00', end_time: '17:00' },
+      friday: { available: false, start_time: '09:00', end_time: '17:00' },
+      saturday: { available: false, start_time: '09:00', end_time: '17:00' },
+      sunday: { available: false, start_time: '09:00', end_time: '17:00' }
+    },
     address_line1: '',
     address_line2: '',
     city: '',
     postal_code: '',
-    emergency_contact_name: '',
-    emergency_contact_phone: '',
     auto_generate_password: true,
     custom_password: '',
     send_welcome_email: true
@@ -39,6 +75,7 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
 
   // Role options based on worker type
@@ -57,7 +94,7 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (name === 'worker_type') {
       // Reset role when worker type changes
       setFormData(prev => ({
@@ -71,6 +108,19 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
         [name]: type === 'checkbox' ? checked : value
       }));
     }
+  };
+
+  const handleAvailabilityChange = (day, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        [day]: {
+          ...prev.availability[day],
+          [field]: value
+        }
+      }
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -93,6 +143,7 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
           last_name: '',
           email: '',
           phone: '',
+          mobile: '',
           employee_id: '',
           worker_type: 'ground_worker',
           role: 'carer',
@@ -100,6 +151,17 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
           start_date: '',
           hourly_rate: '',
           contract_hours_per_week: '',
+          transport_type: 'walking',
+          has_own_transport: false,
+          availability: {
+            monday: { available: false, start_time: '09:00', end_time: '17:00' },
+            tuesday: { available: false, start_time: '09:00', end_time: '17:00' },
+            wednesday: { available: false, start_time: '09:00', end_time: '17:00' },
+            thursday: { available: false, start_time: '09:00', end_time: '17:00' },
+            friday: { available: false, start_time: '09:00', end_time: '17:00' },
+            saturday: { available: false, start_time: '09:00', end_time: '17:00' },
+            sunday: { available: false, start_time: '09:00', end_time: '17:00' }
+          },
           address_line1: '',
           address_line2: '',
           city: '',
@@ -132,446 +194,488 @@ const AddWorkerModal = ({ isOpen, onClose, onWorkerAdded }) => {
   const handleClose = () => {
     setGeneratedPassword('');
     setError('');
+    setSuccess(false);
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">Add New Worker</h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X />
-          </button>
-        </div>
+    <Dialog open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PersonIcon color="primary" />
+            <Typography variant="h6">
+              Add New Worker
+            </Typography>
+          </Box>
+          <IconButton onClick={handleClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+      <DialogContent>
 
-        {/* Generated Password Display */}
-        {generatedPassword && (
-          <div className="p-6 bg-green-50 border-b">
-            <div className="flex items-center space-x-2 mb-2">
-              <Key className="text-green-600" />
-              <h3 className="font-semibold text-green-800">Worker Created Successfully!</h3>
-            </div>
-            <p className="text-sm text-green-700 mb-3">
-              Please share these login credentials securely with the new worker:
-            </p>
-            <div className="bg-white p-3 rounded border">
-              <p><strong>Email:</strong> {formData.email}</p>
-              <p><strong>Password:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{generatedPassword}</code></p>
-            </div>
-            <p className="text-xs text-green-600 mt-2">
-              The worker will be required to change their password on first login.
-            </p>
-            <button
-              onClick={handleClose}
-              className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
-            >
-              Close
-            </button>
-          </div>
+        {success && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            Worker created successfully!
+          </Alert>
         )}
 
-        {/* Error Display */}
         {error && (
-          <div className="p-6 bg-red-50 border-b">
-            <p className="text-red-800">{error}</p>
-          </div>
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        {generatedPassword && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Worker Created Successfully!
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              Please share these login credentials securely with the new worker:
+            </Typography>
+            <Box sx={{ mt: 1, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+              <Typography variant="body2"><strong>Email:</strong> {formData.email}</Typography>
+              <Typography variant="body2"><strong>Password:</strong> <code>{generatedPassword}</code></Typography>
+            </Box>
+            <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+              The worker will be required to change their password on first login.
+            </Typography>
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={handleSubmit}>
           {/* Worker Type Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
               Worker Type *
-            </label>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="worker_type"
+            </Typography>
+            <FormControl component="fieldset">
+              <RadioGroup
+                row
+                name="worker_type"
+                value={formData.worker_type}
+                onChange={handleInputChange}
+              >
+                <FormControlLabel
                   value="ground_worker"
-                  checked={formData.worker_type === 'ground_worker'}
-                  onChange={handleInputChange}
-                  className="mr-2"
+                  control={<Radio />}
+                  label="Ground Worker (Mobile App Only)"
                 />
-                <span>Ground Worker (Mobile App Only)</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="worker_type"
+                <FormControlLabel
                   value="office_worker"
-                  checked={formData.worker_type === 'office_worker'}
-                  onChange={handleInputChange}
-                  className="mr-2"
+                  control={<Radio />}
+                  label="Office Worker (Web + Mobile)"
                 />
-                <span>Office Worker (Web + Mobile)</span>
-              </label>
-            </div>
-          </div>
+              </RadioGroup>
+            </FormControl>
+          </Box>
 
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                First Name *
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 text-gray-400" style={{fontSize: 16}} />
-                <input
-                  type="text"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter first name"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Last Name *
-              </label>
-              <input
-                type="text"
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            Basic Information
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="First Name"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleInputChange}
+                required
+                autoFocus
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Last Name"
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter last name"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email *
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 text-gray-400" style={{fontSize: 16}} />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter email address"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone *
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 text-gray-400" style={{fontSize: 16}} />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter phone number"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Role and Employment */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role *
-              </label>
-              <select
-                name="role"
-                value={formData.role}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {roleOptions[formData.worker_type].map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Employment Type
-              </label>
-              <select
-                name="employment_type"
-                value={formData.employment_type}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="full_time">Full Time</option>
-                <option value="part_time">Part Time</option>
-                <option value="bank">Bank</option>
-                <option value="agency">Agency</option>
-              </select>
-            </div>
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Mobile"
+                name="mobile"
+                type="tel"
+                value={formData.mobile}
+                onChange={handleInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MobileIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Employee ID
-              </label>
-              <input
-                type="text"
+          {/* Employment Details */}
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            Employment Details
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth required>
+                <InputLabel>Role</InputLabel>
+                <Select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
+                  label="Role"
+                >
+                  {roleOptions[formData.worker_type].map(option => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth>
+                <InputLabel>Employment Type</InputLabel>
+                <Select
+                  name="employment_type"
+                  value={formData.employment_type}
+                  onChange={handleInputChange}
+                  label="Employment Type"
+                >
+                  <MenuItem value="full_time">Full Time</MenuItem>
+                  <MenuItem value="part_time">Part Time</MenuItem>
+                  <MenuItem value="bank">Bank</MenuItem>
+                  <MenuItem value="agency">Agency</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Employee ID"
                 name="employee_id"
                 value={formData.employee_id}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Auto-generated if empty"
               />
-            </div>
-          </div>
+            </Grid>
+          </Grid>
 
-          {/* Employment Details */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Start Date"
                 name="start_date"
+                type="date"
                 value={formData.start_date}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                InputLabelProps={{
+                  shrink: true,
+                }}
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hourly Rate (£)
-              </label>
-              <input
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Hourly Rate (£)"
+                name="hourly_rate"
                 type="number"
                 step="0.01"
-                name="hourly_rate"
                 value={formData.hourly_rate}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="0.00"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">£</InputAdornment>,
+                }}
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contract Hours/Week
-              </label>
-              <input
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Contract Hours/Week"
+                name="contract_hours_per_week"
                 type="number"
                 step="0.5"
-                name="contract_hours_per_week"
                 value={formData.contract_hours_per_week}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="37.5"
               />
-            </div>
-          </div>
+            </Grid>
+          </Grid>
+
+          {/* Availability Section */}
+          <Box sx={{ mt: 3, mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <ScheduleIcon sx={{ mr: 1, color: 'primary.main' }} />
+              <Typography variant="h6">
+                Availability
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Select the days and times when this worker is available. This helps with scheduling around childcare and other commitments.
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {Object.entries(formData.availability).map(([day, dayData]) => (
+                <Card key={day} variant="outlined" sx={{
+                  p: 2,
+                  bgcolor: dayData.available ? 'primary.50' : 'grey.50',
+                  borderColor: dayData.available ? 'primary.200' : 'grey.300'
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={dayData.available}
+                          onChange={(e) => handleAvailabilityChange(day, 'available', e.target.checked)}
+                        />
+                      }
+                      label={day.charAt(0).toUpperCase() + day.slice(1)}
+                      sx={{ minWidth: 120 }}
+                    />
+
+                    {dayData.available && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                        <TextField
+                          label="Start Time"
+                          type="time"
+                          value={dayData.start_time}
+                          onChange={(e) => handleAvailabilityChange(day, 'start_time', e.target.value)}
+                          size="small"
+                          InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                          label="End Time"
+                          type="time"
+                          value={dayData.end_time}
+                          onChange={(e) => handleAvailabilityChange(day, 'end_time', e.target.value)}
+                          size="small"
+                          InputLabelProps={{ shrink: true }}
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {(() => {
+                            const start = new Date(`2000-01-01T${dayData.start_time}`);
+                            const end = new Date(`2000-01-01T${dayData.end_time}`);
+                            const diff = (end - start) / (1000 * 60 * 60);
+                            return diff > 0 ? `${diff.toFixed(1)}h` : '';
+                          })()}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Card>
+              ))}
+            </Box>
+          </Box>
+
+          {/* Transport Section */}
+          <Box sx={{ mt: 3, mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <CarIcon sx={{ mr: 1, color: 'success.main' }} />
+              <Typography variant="h6">
+                Transport & Mobility
+              </Typography>
+            </Box>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Transport Type</InputLabel>
+                  <Select
+                    name="transport_type"
+                    value={formData.transport_type}
+                    onChange={handleInputChange}
+                    label="Transport Type"
+                  >
+                    <MenuItem value="walking">Walking</MenuItem>
+                    <MenuItem value="bicycle">Bicycle</MenuItem>
+                    <MenuItem value="car">Car</MenuItem>
+                    <MenuItem value="public_transport">Public Transport</MenuItem>
+                    <MenuItem value="other">Other</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="has_own_transport"
+                      checked={formData.has_own_transport}
+                      onChange={handleInputChange}
+                    />
+                  }
+                  label="Has own reliable transport"
+                  sx={{ mt: 2 }}
+                />
+              </Grid>
+            </Grid>
+          </Box>
 
           {/* Address Information */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Address Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address Line 1
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 text-gray-400" style={{fontSize: 16}} />
-                  <input
-                    type="text"
-                    name="address_line1"
-                    value={formData.address_line1}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter address line 1"
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address Line 2
-                </label>
-                <input
-                  type="text"
-                  name="address_line2"
-                  value={formData.address_line2}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter address line 2 (optional)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter city"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Postal Code
-                </label>
-                <input
-                  type="text"
-                  name="postal_code"
-                  value={formData.postal_code}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter postal code"
-                />
-              </div>
-            </div>
-          </div>
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LocationIcon color="primary" />
+              Address Information
+            </Box>
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Address Line 1"
+                name="address_line1"
+                value={formData.address_line1}
+                onChange={handleInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocationIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Address Line 2"
+                name="address_line2"
+                value={formData.address_line2}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="City"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Postal Code"
+                name="postal_code"
+                value={formData.postal_code}
+                onChange={handleInputChange}
+              />
+            </Grid>
+          </Grid>
 
           {/* Emergency Contact */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Emergency Contact</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Emergency Contact Name
-                </label>
-                <input
-                  type="text"
-                  name="emergency_contact_name"
-                  value={formData.emergency_contact_name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter emergency contact name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Emergency Contact Phone
-                </label>
-                <input
-                  type="tel"
-                  name="emergency_contact_phone"
-                  value={formData.emergency_contact_phone}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter emergency contact phone"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Password Settings */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Password Settings</h3>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="auto_generate_password"
-                  checked={formData.auto_generate_password}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                <label className="text-sm text-gray-700">
-                  Auto-generate secure password (recommended)
-                </label>
-              </div>
-
-              {!formData.auto_generate_password && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Custom Password *
-                  </label>
-                  <div className="relative">
-                    <Key className="absolute left-3 top-3 text-gray-400" style={{fontSize: 16}} />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="custom_password"
-                      value={formData.custom_password}
-                      onChange={handleInputChange}
-                      required={!formData.auto_generate_password}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter custom password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff style={{fontSize: 16}} /> : <Eye style={{fontSize: 16}} />}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Password must be at least 8 characters with uppercase, lowercase, number, and special character.
-                  </p>
-                </div>
-              )}
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="send_welcome_email"
-                  checked={formData.send_welcome_email}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                <label className="text-sm text-gray-700">
-                  Send welcome email with login instructions
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-            >
-              {loading && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              )}
-              <span>{loading ? 'Creating...' : 'Create Worker'}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <EmergencyIcon color="error" />
+              Emergency Contact
+            </Box>
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Emergency Contact Name"
+                name="emergency_contact_name"
+                value={formData.emergency_contact_name}
+                onChange={handleInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Emergency Contact Phone"
+                name="emergency_contact_phone"
+                type="tel"
+                value={formData.emergency_contact_phone}
+                onChange={handleInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? 'Creating...' : 'Create Worker'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

@@ -1,12 +1,34 @@
 import React, { useState } from 'react';
 import {
-  Close as X,
-  Person as User,
-  Phone,
-  LocationOn as MapPin,
-  Favorite as Heart,
-  CalendarToday as Calendar,
-  Group as Users
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  InputAdornment,
+  Alert,
+  IconButton
+} from '@mui/material';
+import {
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  PhoneAndroid as MobileIcon,
+  LocationOn as LocationIcon,
+  Favorite as HeartIcon,
+  CalendarToday as CalendarIcon,
+  Group as GroupIcon,
+  Close as CloseIcon,
+  LocalHospital as MedicalIcon,
+  Accessibility as AccessibilityIcon,
+  Psychology as PsychologyIcon
 } from '@mui/icons-material';
 import { api } from '../services/api';
 
@@ -44,6 +66,7 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const sexOptions = [
     { value: 'male', label: 'Male' },
@@ -97,6 +120,8 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }) => {
       const response = await api.post('/clients', formData);
       
       if (response.data.success) {
+        setSuccess(true);
+
         // Reset form
         setFormData({
           first_name: '',
@@ -146,248 +171,263 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }) => {
 
   const handleClose = () => {
     setError('');
+    setSuccess(false);
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">Add New Client</h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X />
-          </button>
-        </div>
-
-        {/* Error Display */}
-        {error && (
-          <div className="p-6 bg-red-50 border-b">
-            <p className="text-red-800">{error}</p>
-          </div>
+    <Dialog open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PersonIcon color="primary" />
+            <Typography variant="h6">
+              Add New Client
+            </Typography>
+          </Box>
+          <IconButton onClick={handleClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+      <DialogContent>
+        {success && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            Client created successfully!
+          </Alert>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={handleSubmit}>
           {/* Basic Information */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
-              <User className="mr-2" />
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PersonIcon color="primary" />
               Basic Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name *
-                </label>
-                <input
-                  type="text"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter first name"
-                />
-              </div>
+            </Box>
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="First Name"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleInputChange}
+                required
+                autoFocus
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Last Name"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleInputChange}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Preferred Name"
+                name="preferred_name"
+                value={formData.preferred_name}
+                onChange={handleInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name *
-                </label>
-                <input
-                  type="text"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter last name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preferred Name
-                </label>
-                <input
-                  type="text"
-                  name="preferred_name"
-                  value={formData.preferred_name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter preferred name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth *
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 text-gray-400" style={{fontSize: 16}} />
-                  <input
-                    type="date"
-                    name="date_of_birth"
-                    value={formData.date_of_birth}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sex *
-                </label>
-                <select
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Date of Birth"
+                name="date_of_birth"
+                type="date"
+                value={formData.date_of_birth}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Sex</InputLabel>
+                <Select
                   name="sex"
                   value={formData.sex}
                   onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  label="Sex"
                 >
                   {sexOptions.map(option => (
-                    <option key={option.value} value={option.value}>
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  NHS Number
-                </label>
-                <input
-                  type="text"
-                  name="nhs_number"
-                  value={formData.nhs_number}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter NHS number"
-                />
-              </div>
-            </div>
-          </div>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="NHS Number"
+                name="nhs_number"
+                value={formData.nhs_number}
+                onChange={handleInputChange}
+                placeholder="Enter NHS number"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MedicalIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
 
           {/* Contact Information */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
-              <Phone className="mr-2" />
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PhoneIcon color="primary" />
               Contact Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter phone number"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobile
-                </label>
-                <input
-                  type="tel"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter mobile number"
-                />
-              </div>
-            </div>
-          </div>
+            </Box>
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Mobile"
+                name="mobile"
+                type="tel"
+                value={formData.mobile}
+                onChange={handleInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MobileIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
 
           {/* Address Information */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
-              <MapPin className="mr-2" />
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LocationIcon color="primary" />
               Address Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address Line 1 *
-                </label>
-                <input
-                  type="text"
-                  name="address_line1"
-                  value={formData.address_line1}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter address line 1"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address Line 2
-                </label>
-                <input
-                  type="text"
-                  name="address_line2"
-                  value={formData.address_line2}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter address line 2 (optional)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City *
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter city"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Postal Code *
-                </label>
-                <input
-                  type="text"
-                  name="postal_code"
-                  value={formData.postal_code}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter postal code"
-                />
-              </div>
-            </div>
-          </div>
+            </Box>
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Address Line 1"
+                name="address_line1"
+                value={formData.address_line1}
+                onChange={handleInputChange}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocationIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Address Line 2"
+                name="address_line2"
+                value={formData.address_line2}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="City"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Postal Code"
+                name="postal_code"
+                value={formData.postal_code}
+                onChange={handleInputChange}
+                required
+              />
+            </Grid>
+          </Grid>
 
           {/* Care Information */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
-              <Heart className="mr-2" />
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <HeartIcon color="error" />
               Care Information
-            </h3>
+            </Box>
+          </Typography>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -513,7 +553,6 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }) => {
                 />
               </div>
             </div>
-          </div>
 
           {/* Service Information */}
           <div>
@@ -556,7 +595,7 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }) => {
           {/* Emergency Contacts */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
-              <Users className="mr-2" />
+              <GroupIcon className="mr-2" />
               Emergency Contacts
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -645,30 +684,22 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }) => {
               </div>
             </div>
           </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-            >
-              {loading && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              )}
-              <span>{loading ? 'Creating...' : 'Create Client'}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? 'Creating...' : 'Create Client'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

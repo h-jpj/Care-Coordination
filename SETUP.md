@@ -88,6 +88,17 @@ docker-compose up -d database
 docker-compose logs -f database
 ```
 
+The database will automatically initialize with:
+- All required tables (users, clients, client_medications, client_tasks)
+- Sample data including demo users and clients
+- Proper schema with emergency contact fields
+
+**Database Schema:**
+- **users**: Workers and office staff with emergency contacts, availability, transport info
+- **clients**: Client information with medical conditions, contacts, GP details
+- **client_medications**: Medication management with dosage, timing, instructions
+- **client_tasks**: Task lists for workers (personal care, medication, household, etc.)
+
 **Manual Database Setup:**
 ```bash
 # Install MariaDB
@@ -96,13 +107,30 @@ sudo apt install mariadb-server
 # Create database and user
 sudo mysql -u root -p
 CREATE DATABASE care_coordination;
-CREATE USER 'care_user'@'localhost' IDENTIFIED BY 'care_password123';
+CREATE USER 'care_user'@'localhost' IDENTIFIED BY 'care_password';
 GRANT ALL PRIVILEGES ON care_coordination.* TO 'care_user'@'localhost';
 FLUSH PRIVILEGES;
 
-# Import schema
-mysql -u care_user -p care_coordination < database/schema.sql
-mysql -u care_user -p care_coordination < database/init-data.sql
+# Import schema and sample data
+mysql -u care_user -p care_coordination < database/init/01-schema.sql
+mysql -u care_user -p care_coordination < database/init/02-sample-data.sql
+```
+
+**Database Connection Details:**
+- Host: localhost (Docker container)
+- Port: 3307 (external access), 3306 (internal Docker)
+- Database: care_coordination
+- User: care_user
+- Password: care_password
+- Container: care_coordination_db
+
+**Quick Database Access:**
+```bash
+# Connect to database
+sudo docker exec -it care_coordination_db mariadb -u care_user -pcare_password care_coordination
+
+# Alternative with external port (if MariaDB client installed on host)
+mariadb -h localhost -P 3307 -u care_user -pcare_password care_coordination
 ```
 
 ### 5. Backend Setup
@@ -237,15 +265,26 @@ cd mobile && npx react-native start
 
 ### Database Management
 ```bash
-# Access database
-docker exec -it care_coordination_db mysql -u care_user -pcare_password123 care_coordination
+# Access database through Docker container
+sudo docker exec -it care_coordination_db mariadb -u care_user -pcare_password care_coordination
 
-# View tables
+# View all tables
 SHOW TABLES;
 
 # Check sample data
 SELECT * FROM users;
-SELECT * FROM jobs;
+SELECT * FROM clients;
+SELECT * FROM client_medications;
+SELECT * FROM client_tasks;
+
+# Check database structure
+DESCRIBE users;
+DESCRIBE clients;
+
+# Add emergency contact columns (if needed manually)
+ALTER TABLE users
+ADD COLUMN emergency_contact_name VARCHAR(255) NULL AFTER postal_code,
+ADD COLUMN emergency_contact_phone VARCHAR(20) NULL AFTER emergency_contact_name;
 ```
 
 ## 🧪 Testing
@@ -297,6 +336,27 @@ docker-compose restart database
 
 # Check logs
 docker-compose logs database
+
+# Access database to verify tables
+sudo docker exec -it care_coordination_db mariadb -u care_user -pcare_password care_coordination
+SHOW TABLES;
+```
+
+**Missing Database Columns (Worker/Client Creation Fails):**
+```bash
+# Connect to database
+sudo docker exec -it care_coordination_db mariadb -u care_user -pcare_password care_coordination
+
+# Check if emergency contact columns exist
+DESCRIBE users;
+
+# Add missing columns if needed
+ALTER TABLE users
+ADD COLUMN emergency_contact_name VARCHAR(255) NULL AFTER postal_code,
+ADD COLUMN emergency_contact_phone VARCHAR(20) NULL AFTER emergency_contact_name;
+
+# Restart backend after database changes
+docker-compose restart backend
 ```
 
 **API Not Responding:**

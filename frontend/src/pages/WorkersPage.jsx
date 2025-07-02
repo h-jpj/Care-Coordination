@@ -197,7 +197,11 @@ const WorkersPage = () => {
                               {worker.role.replace('_', ' ').toUpperCase()}
                             </Typography>
                             <Typography variant="caption" display="block">
-                              {worker.employment_type.replace('_', ' ')} • {worker.has_own_transport ? 'Own transport' : 'No transport'}
+                              {worker.employment_type.replace('_', ' ')} • {
+                                worker.transport_type ?
+                                  worker.transport_type.charAt(0).toUpperCase() + worker.transport_type.slice(1).replace('_', ' ') :
+                                  'No transport'
+                              }
                             </Typography>
                           </Box>
                         }
@@ -266,7 +270,13 @@ const WorkersPage = () => {
                         </Grid>
                         <Grid item xs={12} sm={6}>
                           <Typography variant="subtitle2" color="textSecondary">Transport</Typography>
-                          <Typography variant="body1">{selectedWorker.has_own_transport ? 'Own transport' : 'No transport'}</Typography>
+                          <Typography variant="body1">
+                            {selectedWorker.transport_type ?
+                              selectedWorker.transport_type.charAt(0).toUpperCase() + selectedWorker.transport_type.slice(1).replace('_', ' ') :
+                              'Not specified'
+                            }
+                            {selectedWorker.has_own_transport && ' (Own transport)'}
+                          </Typography>
                         </Grid>
                       </Grid>
                     )}
