@@ -1,26 +1,17 @@
 # 🏥 Care Coordination System
 
-> **Stop paying £20+ per employee per month for care management software!**
->
-> This open-source system does everything the expensive ones do - for FREE.
+> This open-source system will do everything the expensive ones do - for FREE...
+> It's also just a demo for a friend and the company they work for.
 
 **📋 Windows users: See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed setup instructions**
 
-## 💰 Why Build This?
+## ✨ What Will It Do
 
-Current care management software costs **£20+ per employee per month**. For a company with 50 employees, that's **£12,000+ per year**!
-
-This system provides the same features for the cost of hosting (~£20/month total).
-
-**Annual savings: £11,760+ for 50 employees**
-
-## ✨ What It Does
-
-### For Care Managers
-- **Worker Management**: Add staff, track hours, manage schedules
-- **Client Management**: Complete client profiles with medical info
+### For Care Managers / Office Workers
+- **Worker Management**: Add staff, track hours, manage schedules 
+- **Client Management**: Complete client profiles with medical info 
 - **Medication Tracking**: Daily medication schedules and reminders
-- **Task Management**: Assign care tasks (bathing, cooking, cleaning)
+- **Task Management**: Assign care tasks (bathing, cooking, cleaning,etc)
 - **Real-time Updates**: See what's happening across all sites
 
 ### For Care Workers
@@ -77,13 +68,15 @@ SELECT * FROM clients;
 
 ## 📋 How to Use
 
-### Adding Workers
+> ⭐ = Done
+
+### Adding Workers ⭐
 1. Go to "Workers" section
 2. Click "Add Worker"
 3. Fill in details (name, role, contact info, hours)
 4. Worker can now log in and see their tasks
 
-### Adding Clients
+### Adding Clients ⭐
 1. Go to "Clients" section  
 2. Click "Add Client"
 3. Add personal info, medical conditions, care needs
@@ -169,13 +162,10 @@ docker-compose down
 
 MIT License - You can use this commercially, modify it, and distribute it freely.
 
-## 🎯 What's Next?
+## 🎯 What Else Might Be Added?
 
-- [ ] Mobile app for workers
-- [ ] Advanced reporting
-- [ ] Email/SMS notifications  
+- [ ] Advanced reporting 
 - [ ] Integration with payroll systems
-- [ ] Multi-location support
 
 ---
 
