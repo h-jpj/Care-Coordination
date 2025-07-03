@@ -28,6 +28,7 @@ import {
   Close as CloseIcon,
   LocalHospital as MedicalIcon,
   Accessibility as AccessibilityIcon,
+  Email as EmailIcon,
   Psychology as PsychologyIcon
 } from '@mui/icons-material';
 import { api } from '../services/api';
@@ -428,262 +429,272 @@ const AddClientModal = ({ isOpen, onClose, onClientAdded }) => {
               Care Information
             </Box>
           </Typography>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Medical Conditions
-                </label>
-                <textarea
-                  name="medical_conditions"
-                  value={formData.medical_conditions}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter medical conditions"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Allergies
-                </label>
-                <textarea
-                  name="allergies"
-                  value={formData.allergies}
-                  onChange={handleInputChange}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter allergies"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobility Level
-                </label>
-                <select
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Medical Conditions"
+                name="medical_conditions"
+                value={formData.medical_conditions}
+                onChange={handleInputChange}
+                multiline
+                rows={3}
+                placeholder="Enter medical conditions"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MedicalIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Allergies"
+                name="allergies"
+                value={formData.allergies}
+                onChange={handleInputChange}
+                multiline
+                rows={2}
+                placeholder="Enter allergies"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Mobility Level</InputLabel>
+                <Select
                   name="mobility_level"
                   value={formData.mobility_level}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  label="Mobility Level"
                 >
                   {mobilityOptions.map(option => (
-                    <option key={option.value} value={option.value}>
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cognitive Status
-                </label>
-                <select
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Cognitive Status</InputLabel>
+                <Select
                   name="cognitive_status"
                   value={formData.cognitive_status}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  label="Cognitive Status"
                 >
                   {cognitiveOptions.map(option => (
-                    <option key={option.value} value={option.value}>
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fall Risk
-                </label>
-                <select
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Fall Risk</InputLabel>
+                <Select
                   name="fall_risk"
                   value={formData.fall_risk}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  label="Fall Risk"
                 >
                   {fallRiskOptions.map(option => (
-                    <option key={option.value} value={option.value}>
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Preferred Language"
+                name="preferred_language"
+                value={formData.preferred_language}
+                onChange={handleInputChange}
+                placeholder="Enter preferred language"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Communication Needs"
+                name="communication_needs"
+                value={formData.communication_needs}
+                onChange={handleInputChange}
+                multiline
+                rows={2}
+                placeholder="Enter communication needs (e.g., hearing aid, large print)"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Dietary Requirements"
+                name="dietary_requirements"
+                value={formData.dietary_requirements}
+                onChange={handleInputChange}
+                multiline
+                rows={2}
+                placeholder="Enter dietary requirements"
+              />
+            </Grid>
+          </Grid>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preferred Language
-                </label>
-                <input
-                  type="text"
-                  name="preferred_language"
-                  value={formData.preferred_language}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter preferred language"
-                />
-              </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Communication Needs
-                </label>
-                <textarea
-                  name="communication_needs"
-                  value={formData.communication_needs}
-                  onChange={handleInputChange}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter communication needs (e.g., hearing aid, large print)"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Dietary Requirements
-                </label>
-                <textarea
-                  name="dietary_requirements"
-                  value={formData.dietary_requirements}
-                  onChange={handleInputChange}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter dietary requirements"
-                />
-              </div>
-            </div>
 
           {/* Service Information */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Service Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Service Start Date *
-                </label>
-                <input
-                  type="date"
-                  name="service_start_date"
-                  value={formData.service_start_date}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Funding Source
-                </label>
-                <select
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            Service Information
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Service Start Date"
+                name="service_start_date"
+                type="date"
+                value={formData.service_start_date}
+                onChange={handleInputChange}
+                required
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Funding Source</InputLabel>
+                <Select
                   name="funding_source"
                   value={formData.funding_source}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  label="Funding Source"
                 >
                   {fundingOptions.map(option => (
-                    <option key={option.value} value={option.value}>
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
-            </div>
-          </div>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
 
           {/* Emergency Contacts */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
-              <GroupIcon className="mr-2" />
+          <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <GroupIcon />
               Emergency Contacts
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Primary Contact Name
-                </label>
-                <input
-                  type="text"
-                  name="primary_contact_name"
-                  value={formData.primary_contact_name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter primary contact name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Primary Contact Phone
-                </label>
-                <input
-                  type="tel"
-                  name="primary_contact_phone"
-                  value={formData.primary_contact_phone}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter primary contact phone"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Relationship
-                </label>
-                <input
-                  type="text"
-                  name="primary_contact_relationship"
-                  value={formData.primary_contact_relationship}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Daughter, Son, Spouse"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  GP Name
-                </label>
-                <input
-                  type="text"
-                  name="gp_name"
-                  value={formData.gp_name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter GP name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  GP Phone
-                </label>
-                <input
-                  type="tel"
-                  name="gp_phone"
-                  value={formData.gp_phone}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter GP phone"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  GP Email
-                </label>
-                <input
-                  type="email"
-                  name="gp_email"
-                  value={formData.gp_email}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter GP email"
-                />
-              </div>
-            </div>
-          </div>
+            </Box>
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Primary Contact Name"
+                name="primary_contact_name"
+                value={formData.primary_contact_name}
+                onChange={handleInputChange}
+                placeholder="Enter primary contact name"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Primary Contact Phone"
+                name="primary_contact_phone"
+                type="tel"
+                value={formData.primary_contact_phone}
+                onChange={handleInputChange}
+                placeholder="Enter primary contact phone"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Relationship"
+                name="primary_contact_relationship"
+                value={formData.primary_contact_relationship}
+                onChange={handleInputChange}
+                placeholder="e.g., Daughter, Son, Spouse"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="GP Name"
+                name="gp_name"
+                value={formData.gp_name}
+                onChange={handleInputChange}
+                placeholder="Enter GP name"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MedicalIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="GP Phone"
+                name="gp_phone"
+                type="tel"
+                value={formData.gp_phone}
+                onChange={handleInputChange}
+                placeholder="Enter GP phone"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="GP Email"
+                name="gp_email"
+                type="email"
+                value={formData.gp_email}
+                onChange={handleInputChange}
+                placeholder="Enter GP email"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
         </Box>
       </DialogContent>
       <DialogActions>
